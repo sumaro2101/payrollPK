@@ -1,1 +1,4 @@
-__all__ = ('',)
+__all__ = ('Base',
+           )
+
+from .base import Base as Base
