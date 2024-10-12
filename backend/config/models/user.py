@@ -35,6 +35,7 @@ class User(Base):
                                                         nullable=True,
                                                         )
     active: Mapped[bool] = mapped_column(default=True)
+    is_accountant: Mapped[bool] = mapped_column(default=False)
 
     _phone_number: Mapped[str] = mapped_column(Unicode(20))
     country_code: Mapped[str] = mapped_column(Unicode(8))
@@ -43,11 +44,10 @@ class User(Base):
         _phone_number,
         country_code,
     )
-    position = ForeignKey('positions.id')
+    position_id: Mapped[int] = mapped_column(ForeignKey('positions.id'))
     picture = image_attachment('UserPicture')
 
     position: Mapped['Position'] = relationship(
-        'Position',
         back_populates='users',
     )
 
@@ -56,4 +56,4 @@ class UserPicture(UserRelationMixin, Base, Image):
     """
     Модель фотографии персонала
     """
-    _user_back_populates = 'user_picture'
+    _user_back_populates = 'picture'
