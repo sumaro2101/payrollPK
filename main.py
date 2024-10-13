@@ -13,6 +13,7 @@ from backend.api_v1 import router
 async def lifespan(app: FastAPI):
     async with db_setup.engine.begin() as conn:
         await conn.run_sync(Base.metadata.create_all)
+        
         yield
     await db_setup.dispose()
 

@@ -2,6 +2,7 @@ from sqlalchemy.ext.asyncio import AsyncSession
 from fastapi import APIRouter, Depends, status
 
 from backend.config.models.position import Position
+from backend.config.models.user import User
 
 from .schemas import (CreatePositionSchema,
                       PositionSchema,
@@ -9,6 +10,7 @@ from .schemas import (CreatePositionSchema,
                       UpdatePositionSchema,
                       )
 from backend.config.db import db_setup
+from .permissions import is_accountant
 from . import crud
 from .dependencies import get_position
 
@@ -28,6 +30,7 @@ async def get_list_positions(session: AsyncSession = Depends(db_setup.get_sessio
             response_model=PositionSchema,
             status_code=status.HTTP_201_CREATED,)
 async def create_position(position_schema: CreatePositionSchema,
+                          accountant: User = Depends(is_accountant),
                           session: AsyncSession = Depends(db_setup.get_session),
                           ):
     return await crud.create_position(
@@ -48,6 +51,7 @@ async def get_position(position: Position = Depends(get_position)):
               )
 async def update_position(position_id: int,
                           position_schema: UpdatePositionSchema,
+                          accountant: User = Depends(is_accountant),
                           session: AsyncSession = Depends(db_setup.get_session),
                           ):
     return await crud.update_position(
@@ -61,6 +65,7 @@ async def update_position(position_id: int,
                status_code=status.HTTP_204_NO_CONTENT,
                )
 async def delete_position(position_id: int,
+                          accountant: User = Depends(is_accountant),
                           session: AsyncSession = Depends(db_setup.get_session),
                           ):
     return await crud.delete_position(

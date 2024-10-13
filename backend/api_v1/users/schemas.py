@@ -30,24 +30,7 @@ class UserSchemaVision(BaseUserSchema):
     """
     id: int
     picture: str | None
-    phone_number: str = Field(alias='_phone_number',
-                              min_length=10,
-                              max_length=20,
-                              )
-    position: BasePositionSchema
-
-
-class AccountantSchemaVision(BaseUserSchema):
-    """
-    Схема для бухгалтера
-    """
-    id: int
-    picture: str | None
-    salary: Decimal = Field(max_digits=12,
-                            decimal_places=2,
-                            gt=0,
-                            )
-    position: BasePositionSchema
+    position: BasePositionSchema | None
     is_admin: bool
     is_accountant: bool
     phone_number: str = Field(alias='_phone_number',
@@ -58,6 +41,16 @@ class AccountantSchemaVision(BaseUserSchema):
     login_date: datetime | None = Field(default=None)
 
 
+class AccountantSchemaVision(UserSchemaVision):
+    """
+    Схема для бухгалтера
+    """
+    salary: Decimal = Field(max_digits=12,
+                            decimal_places=2,
+                            gt=0,
+                            )
+
+
 class CreateUserSchema(BaseUserSchema):
     """
     Схема создания пользователя
@@ -66,7 +59,7 @@ class CreateUserSchema(BaseUserSchema):
                             decimal_places=2,
                             gt=0,
                             )
-    position_id: int = Field(gt=0)
+    position_id: int | None = Field(gt=0)
     country_code: str = Field(default='RU')
     phone_number: str = Field(default='9006001000')
     password_1: str
@@ -111,7 +104,7 @@ class UpdateUserSchema(BaseModel):
 class ViewUserSchema(BaseUserSchema):
     id: int
     picture: str | None
-    position_id: int = Field(gt=0)
+    position_id: int | None = Field(gt=0)
     country_code: str = Field(default='RU')
     phone_number: str = Field(default='9006001000')
     create_date: datetime

@@ -36,6 +36,6 @@ class Settings(BaseSettings):
     directory: Path = 'backend/static'
     staticname: str = 'static'
     url_images: Path = BASE_DIR / 'images'
-
+    ADMIN_PASSWORD: str = config('ADMIN_PASSWORD')
 
 settings = Settings()

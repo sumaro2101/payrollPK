@@ -4,6 +4,7 @@ from datetime import datetime
 
 from sqlalchemy import Select
 from sqlalchemy.ext.asyncio import AsyncSession
+from sqlalchemy.orm import selectinload
 
 from fastapi import Depends
 from fastapi.security import HTTPBasic, HTTPBasicCredentials
@@ -25,7 +26,8 @@ async def get_active_user(
     password = credentials.password
 
     stmt = (Select(User)
-            .where(User.login == login))
+            .where(User.login == login)
+            .options(selectinload(User.position)))
     user: User = await session.scalar(statement=stmt)
     if not user:
         raise_incorect_values()

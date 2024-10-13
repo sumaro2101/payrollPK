@@ -45,7 +45,7 @@ class User(Base):
         _phone_number,
         country_code,
     )
-    position_id: Mapped[int] = mapped_column(ForeignKey('positions.id'))
+    position_id: Mapped[int | None] = mapped_column(ForeignKey('positions.id'))
 
     position: Mapped['Position'] = relationship(
         back_populates='users',
