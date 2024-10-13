@@ -21,18 +21,27 @@ from .utils import (upload_file,
 from loguru import logger
 
 
-async def get_users(session: AsyncSession):
+async def get_users(user: User,
+                    session: AsyncSession,
+                    ):
     stmt = (Select(User)
             .options(selectinload(User.position))
             .order_by(User.id))
     users: ScalarResult[User] = await session.scalars(statement=stmt)
-    return list(users)
+    result = list(users)
+    if user.is_accountant or user.is_admin:
+        return result
+    else:
+        for item in result:
+            delattr(item, 'salary')
+        return result
 
 
 async def create_user(user_schema: CreateUserSchema,
                       photo: UploadFile,
                       session: AsyncSession,
                       accountant: bool,
+                      admin: bool = False,
                       ) -> User:
     password_1, password_2 = user_schema.password_1, user_schema.password_2
     checked_password = PasswordsChecker(
@@ -50,6 +59,7 @@ async def create_user(user_schema: CreateUserSchema,
                            password=hashed_password,
                            phone=phone_number,
                            is_accountant=accountant,
+                           is_admin=admin
                            ))
     try:
         session.add(preform_create)
@@ -101,5 +111,6 @@ async def delete_user(user: User,
                       session: AsyncSession,
                       ):
     delete_dir(user.login)
-    await session.delete(user)
-    await session.commit()
+    if not user.is_admin:
+        await session.delete(user)
+        await session.commit()

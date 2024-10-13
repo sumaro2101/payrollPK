@@ -15,10 +15,12 @@ from backend.api_v1.users.schemas import (
     CreateUserSchema,
     ViewUserSchema,
     UpdateUserSchema,
+    UserSchemaVision,
     )
 from backend.config.db import db_setup
+from backend.api_v1.auth import get_active_user
 from . import crud
-from .permissions import is_admin
+from .permissions import is_admin, is_accountant
 
 
 router = APIRouter(prefix='/users',
@@ -27,25 +29,41 @@ router = APIRouter(prefix='/users',
 
 
 @router.get(path='/get/list/',
-            response_model=list[AccountantSchemaVision],
             description='Получение списка пользователей',
             )
-async def get_list_users(session: AsyncSession = Depends(db_setup.get_session)):
+async def get_list_users(user: User = Depends(get_active_user),
+                         session: AsyncSession = Depends(db_setup.get_session),
+                         ) -> list[AccountantSchemaVision] | list[UserSchemaVision]:
     """
     Энд поинт получения пользователей
     """
-    return await crud.get_users(session=session)
+    return await crud.get_users(user=user,
+                                session=session,
+                                )
+
+
+@router.get(path='/get/profile/',
+            response_model=AccountantSchemaVision,
+            description='Просмотр профиля текущего пользователя',
+            )
+async def get_profile(user: User = Depends(get_active_user)):
+    return user
 
 
 @router.get(path='/get/{user_id}/',
-            response_model=AccountantSchemaVision,
             description='Получение пользователя по ID',
             )
-async def get_user(user: User = Depends(get_user_by_id)):
+async def get_user(user: User = Depends(get_active_user),
+                   user_seach: User = Depends(get_user_by_id),
+                   ) -> AccountantSchemaVision | UserSchemaVision:
     """
     Энд поинт получения пользователя по ID
     """
-    return user
+    if user.is_admin or user.is_accountant or user.id == user_seach.id:
+        return user_seach
+    else:
+        delattr(user_seach, 'salary')
+        return user_seach
 
 
 @router.put(path='/create/',
@@ -54,13 +72,14 @@ async def get_user(user: User = Depends(get_user_by_id)):
             status_code=status.HTTP_201_CREATED,
             )
 async def create_user(user_schema: CreateUserSchema,
+                      accountant: User = Depends(is_accountant),
                       photo: UploadFile | str = '',
                       session: AsyncSession = Depends(db_setup.get_session),
                       ):
     """
     Энд поинт создания пользователя
     """
-    accountant: bool = False
+    is_accountant: bool = False
     if photo:
         correct = check_format_file(photo.filename)
         if not correct:
@@ -70,7 +89,7 @@ async def create_user(user_schema: CreateUserSchema,
         user_schema=user_schema,
         photo=photo,
         session=session,
-        accountant=accountant,
+        accountant=is_accountant,
     )
 
 
@@ -86,7 +105,7 @@ async def create_accountant(user_schema: CreateUserSchema,
     """
     Энд поинт создания бухгалтера
     """
-    accountant: bool = True
+    is_accountant: bool = True
     if photo:
         correct = check_format_file(photo.filename)
         if not correct:
@@ -96,7 +115,7 @@ async def create_accountant(user_schema: CreateUserSchema,
         user_schema=user_schema,
         photo=photo,
         session=session,
-        accountant=accountant,
+        accountant=is_accountant,
     )
 
 
@@ -105,6 +124,7 @@ async def create_accountant(user_schema: CreateUserSchema,
               description='Обновление пользователя',
               )
 async def update_user(user_schema: UpdateUserSchema,
+                      accountant: User = Depends(is_accountant),
                       user: User = Depends(get_user_by_id),
                       photo: UploadFile | str = '',
                       session: AsyncSession = Depends(db_setup.get_session),
@@ -128,7 +148,8 @@ async def update_user(user_schema: UpdateUserSchema,
 @router.delete(path='/delete/{user_id}/',
                status_code=status.HTTP_204_NO_CONTENT,
                )
-async def delete_user(user: User = Depends(get_user_by_id),
+async def delete_user(accountant: User = Depends(is_accountant),
+                      user: User = Depends(get_user_by_id),
                       session: AsyncSession = Depends(db_setup.get_session),
                       ):
     return await crud.delete_user(
