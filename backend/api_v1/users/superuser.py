@@ -10,7 +10,7 @@ from backend.api_v1.users.crud import create_user
 
 
 superuser_schema = CreateUserSchema(
-    login=input('Your admin login\n'),
+    login=input('Yadmiour admin login\n'),
     name='admin',
     surname='admin',
     active=True,
