@@ -36,6 +36,7 @@ class User(Base):
                                                         )
     active: Mapped[bool] = mapped_column(default=True)
     is_accountant: Mapped[bool] = mapped_column(default=False)
+    is_admin: Mapped[bool] = mapped_column(default=False)
 
     _phone_number: Mapped[str] = mapped_column(Unicode(20))
     country_code: Mapped[str] = mapped_column(Unicode(8))

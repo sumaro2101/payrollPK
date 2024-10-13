@@ -16,6 +16,7 @@ from .utils import (upload_file,
                     rename_dir_of_login,
                     rm_save_upload_file,
                     make_image_directory,
+                    delete_dir,
                     )
 from loguru import logger
 
@@ -31,6 +32,7 @@ async def get_users(session: AsyncSession):
 async def create_user(user_schema: CreateUserSchema,
                       photo: UploadFile,
                       session: AsyncSession,
+                      accountant: bool,
                       ) -> User:
     password_1, password_2 = user_schema.password_1, user_schema.password_2
     checked_password = PasswordsChecker(
@@ -47,6 +49,7 @@ async def create_user(user_schema: CreateUserSchema,
                                                              )),
                            password=hashed_password,
                            phone=phone_number,
+                           is_accountant=accountant,
                            ))
     try:
         session.add(preform_create)
@@ -94,9 +97,9 @@ async def update_user(user: User,
     return user
 
 
-async def delete_user(user_id: str,
+async def delete_user(user: User,
                       session: AsyncSession,
                       ):
-    stmt = Delete(User).where(User.id == user_id)
-    await session.execute(statement=stmt)
-    await session.commit()    
+    delete_dir(user.login)
+    await session.delete(user)
+    await session.commit()
