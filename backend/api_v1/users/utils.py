@@ -1,6 +1,7 @@
 from fastapi import UploadFile
 import os
 import aiofiles
+import shutil
 
 from backend.config.settings import IMAGE_URL
 
@@ -54,3 +55,11 @@ def make_image_directory(dir_name: str) -> None:
     """
     file_path = IMAGE_URL(dir_name)
     os.mkdir(file_path)
+
+
+def delete_dir(dir_name: str) -> None:
+    """
+    Удаление папки
+    """
+    dir_path = IMAGE_URL(dir_name)
+    shutil.rmtree(dir_path, ignore_errors=True)

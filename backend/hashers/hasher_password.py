@@ -68,6 +68,7 @@ class PasswordHashCheker(BaseModel):
             password=self.password,
             hash_password=self.hash_password,
         )
+        return is_correct
 
 
 def encode_password(password: str,

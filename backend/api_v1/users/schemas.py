@@ -16,11 +16,11 @@ class BaseUserSchema(BaseModel):
     Базовая схема пользователя
     """
     model_config = ConfigDict(from_attributes=True, populate_by_name=True)
+    
     login: str
     name: str
     surname: str
     middle_name: str | None = Field(default=None)
-    is_accountant: bool
     active: bool
 
 
@@ -48,6 +48,8 @@ class AccountantSchemaVision(BaseUserSchema):
                             gt=0,
                             )
     position: BasePositionSchema
+    is_admin: bool
+    is_accountant: bool
     phone_number: str = Field(alias='_phone_number',
                               min_length=10,
                               max_length=20,
@@ -88,7 +90,6 @@ class UpdateUserSchema(BaseModel):
     name: str | None = Field(default=None)
     surname: str | None = Field(default=None)
     middle_name: str | None = Field(default=None)
-    is_accountant: bool | None = Field(default=None)
     active: bool | None = Field(default=None)
     salary: Decimal | None = Field(max_digits=12,
                                    decimal_places=2,
