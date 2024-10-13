@@ -40,6 +40,9 @@ class DataBaseSetup:
         return session
 
     async def get_session(self) -> AsyncGenerator[AsyncSession, Any]:
+        """
+        Получение сессии
+        """
         session = self._get_scoped_session()
         yield session
         await session.remove()
