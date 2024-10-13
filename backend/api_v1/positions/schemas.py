@@ -9,17 +9,17 @@ class UserSchema(BaseModel):
     login: str
     name: str
     surname: str
-    middle_name: str | None = Field(default=None)
+    middle_name: str | None
     is_accountant: bool
     active: bool
-    picture: str
+    picture: str | None
     salary: Decimal = Field(max_digits=12,
                             decimal_places=2,
                             gt=0,
                             )
-    phone: str
+    phone_number: str = Field(alias='_phone_number')
     create_date: datetime
-    login_date: datetime | None = Field(default=None)
+    login_date: datetime | None
 
 
 class BasePositionSchema(BaseModel):

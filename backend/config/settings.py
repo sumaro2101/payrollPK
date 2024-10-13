@@ -1,6 +1,14 @@
 from pydantic import BaseModel
 from pydantic_settings import BaseSettings, SettingsConfigDict
 from starlette.config import Config
+from pathlib import Path
+from functools import partial
+import os
+
+
+BASE_DIR = Path(__file__).parent.parent
+
+IMAGE_URL = partial(os.path.join, 'backend', 'images')
 
 
 config = Config('.env')
@@ -24,6 +32,10 @@ class Settings(BaseSettings):
         extra='ignore',
     )
     DB: DBSettings = DBSettings()
+    url_staticfiles: Path = '/backend/static'
+    directory: Path = 'backend/static'
+    staticname: str = 'static'
+    url_images: Path = BASE_DIR / 'images'
 
 
 settings = Settings()

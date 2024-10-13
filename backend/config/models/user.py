@@ -2,7 +2,6 @@ from sqlalchemy.orm import Mapped, mapped_column, composite, relationship
 from sqlalchemy.types import LargeBinary, DECIMAL
 from sqlalchemy import String, Unicode, func, ForeignKey
 from sqlalchemy_utils import PhoneNumber
-from sqlalchemy_imageattach.entity import image_attachment, Image
 
 from typing import TYPE_CHECKING
 
@@ -20,6 +19,7 @@ class User(Base):
     Модель пользователя
     """
     login: Mapped[str] = mapped_column(unique=True)
+    picture: Mapped[str | None] = mapped_column(default=None)
     name: Mapped[str] = mapped_column(String(50))
     surname: Mapped[str] = mapped_column(String(70))
     middle_name: Mapped[str] = mapped_column(String(70),
@@ -45,15 +45,7 @@ class User(Base):
         country_code,
     )
     position_id: Mapped[int] = mapped_column(ForeignKey('positions.id'))
-    picture = image_attachment('UserPicture')
 
     position: Mapped['Position'] = relationship(
         back_populates='users',
     )
-
-
-class UserPicture(UserRelationMixin, Base, Image):
-    """
-    Модель фотографии персонала
-    """
-    _user_back_populates = 'picture'

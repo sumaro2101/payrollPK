@@ -17,9 +17,9 @@ from .schemas import (AccountantSchemaVision,
                       )
 
 
-async def get_user(user_id: Annotated[int, Path()],
-                   session: AsyncSession = Depends(db_setup.get_session),
-                   ) -> User:
+async def get_user_by_id(user_id: Annotated[int, Path(gt=0)],
+                        session: AsyncSession = Depends(db_setup.get_session),
+                        ) -> User:
     """
     Получение пользователя по ID
     """

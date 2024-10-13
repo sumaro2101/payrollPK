@@ -72,6 +72,11 @@ async def delete_position(position_id: int,
                           ) -> None:
     stmt = (Delete(Position)
             .where(Position.id == position_id))
-    await session.execute(statement=stmt)
-    await session.commit()
+    try:
+        await session.execute(statement=stmt)
+        await session.commit()
+    except IntegrityError as ex:
+        error = sql_parse_error_message(ex=ex)
+        raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST,
+                            detail=dict(delete=error))
     return None
