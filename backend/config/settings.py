@@ -14,6 +14,14 @@ IMAGE_URL = partial(os.path.join, 'backend', 'images')
 config = Config('.env')
 
 
+class Logging(BaseModel):
+    FORMAT: str = '{time} {level} {message}'
+    LOGGER_LOG: str = config('LOGGER_LOG')
+    LOGGER_LEVEL: str = config('LOGGER_LEVEL')
+    LOGGER_ROTATION: str = config('LOGGER_ROTATION')
+    LOGGER_COMPRESSION: str = config('LOGGER_COMPRESSION')
+
+
 class DBSettings(BaseModel):
     _engine: str = config('DB_ENGINE')
     _owner: str = config('DB_USER')
@@ -40,5 +48,6 @@ class Settings(BaseSettings):
     url_images: Path = BASE_DIR / 'images'
     ADMIN_LOGIN: str = config('ADMIN_LOGIN')
     ADMIN_PASSWORD: str = config('ADMIN_PASSWORD')
+    LOGGING: Logging = Logging()
 
 settings = Settings()

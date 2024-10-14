@@ -120,8 +120,10 @@ async def create_accountant(user_schema: CreateUserSchema,
 
 
 @router.patch(path='/update/{user_id}',
-              response_model=ViewUserSchema,
+              response_model=UpdateUserSchema,
               description='Обновление пользователя',
+              response_model_exclude_none=True,
+              response_model_exclude_unset=True,
               )
 async def update_user(user_schema: UpdateUserSchema,
                       accountant: User = Depends(is_accountant),
