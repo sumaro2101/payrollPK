@@ -53,8 +53,11 @@ def make_image_directory(dir_name: str) -> None:
     """
     Создание папки для изобращений
     """
-    file_path = IMAGE_URL(dir_name)
-    os.mkdir(file_path)
+    try:
+        file_path = IMAGE_URL(dir_name)
+        os.mkdir(file_path)
+    except FileExistsError:
+        return
 
 
 def delete_dir(dir_name: str) -> None:
