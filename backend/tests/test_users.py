@@ -108,19 +108,6 @@ async def test_permission_create_update_delete_user(client: AsyncClient,
 
 
 @pytest.mark.asyncio()
-async def test_get_list_users(client: AsyncClient,
-                         user,
-                         ):
-    response = await client.get(
-        url='users/get/list',
-        headers={'Authorization': user,
-                 'Accept': '*/*',
-                 },
-    )
-    assert response.status_code == 200
-
-
-@pytest.mark.asyncio()
 async def test_create_user_duck(client: AsyncClient,
                                 payload_create_user_accountant,
                                 accountant,
@@ -160,6 +147,20 @@ async def test_create_accountant(client: AsyncClient,
     logger.info(f'status code {response.status_code}')
     logger.info(f'detail = {response.content}')
     assert response.status_code == 201
+
+
+@pytest.mark.asyncio()
+async def test_get_list_users(client: AsyncClient,
+                         user,
+                         ):
+    response = await client.get(
+        url='users/get/list',
+        headers={'Authorization': user,
+                 'Accept': '*/*',
+                 },
+    )
+    assert response.status_code == 200
+    assert 'salary' not in response.json()[0]
 
 
 @pytest.mark.asyncio()

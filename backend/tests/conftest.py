@@ -115,8 +115,10 @@ async def user(payload_create_user_accountant: dict):
         password=payload_create_user_accountant['password_1'],
         ).get_hashed_password()
     payload.update(password=password,
+                   login='user',
                    _phone_number='9006001000',
                    country_code='RU',
+                   id=11111,
                    )
     async with db_setup.session() as session:
         user = User(**payload)
@@ -131,7 +133,7 @@ async def user(payload_create_user_accountant: dict):
 @pytest_asyncio.fixture(scope='session')
 async def accountant(payload_create_user_accountant: dict):
     payload = payload_create_user_accountant.copy()
-    payload['id'] = 4444
+    payload['id'] = 44444
     payload['login'] = 'accountant'
     payload.pop('password_1')
     payload.pop('password_2')
