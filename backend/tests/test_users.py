@@ -27,7 +27,9 @@ async def test_create_update_delete_user(client: AsyncClient,
                                         ):
     response = await client.put(
         'users/create',
-        data=dict(user_schema=json.dumps(payload_create_user_accountant), photo=''),
+        data=dict(user_schema=json.dumps(payload_create_user_accountant),
+                  photo='',
+                  ),
         headers={'Authorization': admin,
                  'Accept': '*/*',
                  },
