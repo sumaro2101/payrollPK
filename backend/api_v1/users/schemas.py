@@ -90,8 +90,8 @@ class UpdateUserSchema(BaseModel):
                                    default=None,
                                    )
     position_id: int | None = Field(gt=0, default=None)
-    country_code: str | None = Field(default=None)
-    phone_number: str | None = Field(default=None)
+    country_code: str = Field(default='RU')
+    phone_number: str = Field(default='9006001000')
 
     @model_validator(mode='before')
     @classmethod

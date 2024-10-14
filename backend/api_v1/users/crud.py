@@ -7,6 +7,8 @@ from sqlalchemy_utils import PhoneNumber
 
 from fastapi import UploadFile, status, HTTPException
 
+from sqlalchemy_utils import PhoneNumberParseException
+
 from backend.config.models import User
 from backend.hashers import PasswordHasher
 from backend.handlers.handle_error import sql_parse_error_message
@@ -21,6 +23,7 @@ from .utils import (upload_file,
 from loguru import logger
 
 
+@logger.catch(reraise=True, exclude=HTTPException)
 async def get_users(user: User,
                     session: AsyncSession,
                     ):
@@ -37,12 +40,15 @@ async def get_users(user: User,
         return result
 
 
+@logger.catch(reraise=True, exclude=(HTTPException, PhoneNumberParseException))
 async def create_user(user_schema: CreateUserSchema,
                       photo: UploadFile,
                       session: AsyncSession,
                       accountant: bool,
                       admin: bool = False,
                       ) -> User:
+    logger.debug(f'try create user {user_schema.model_dump(exclude=("password_1", "password_2"))}')
+    logger.debug(f'photo {photo}')
     if not user_schema.position_id and not (admin or accountant):
         raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST,
                             detail=dict(position_id='Cant be null'))
@@ -51,14 +57,24 @@ async def create_user(user_schema: CreateUserSchema,
         password_1=password_1,
         password_2=password_2,
         ).get_password()
-    hashed_password = PasswordHasher(password=checked_password).get_hashed_password()
-    phone_number = PhoneNumber(user_schema.phone_number, user_schema.country_code)
+    hashed_password = PasswordHasher(
+        password=checked_password,
+        ).get_hashed_password()
+    try:
+        phone_number = PhoneNumber(
+            user_schema.phone_number,
+            user_schema.country_code,
+            check_region=True,
+            )
+    except PhoneNumberParseException:
+        raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST,
+                            detail=dict(phone_number='Invalid phone number'))
     logger.info(f'user_schema = {user_schema}')
-    preform_create = (User(**user_schema.model_dump(exclude=('password_1',
-                                                             'password_2',
-                                                             'phone_number',
-                                                             'county_code',
-                                                             )),
+    preform_create = (User(**user_schema.model_dump(exclude=(
+        'password_1',
+        'password_2',
+        'phone_number',
+        'county_code')),
                            password=hashed_password,
                            phone=phone_number,
                            is_accountant=accountant,
@@ -80,17 +96,40 @@ async def create_user(user_schema: CreateUserSchema,
         error = sql_parse_error_message(ex=ex)
         raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST,
                             detail=dict(user=error))
+    logger.debug(
+        f'has create user {preform_create.id} {preform_create.login}: {preform_create}',
+        )
     return preform_create
 
 
+@logger.catch(reraise=True, exclude=(HTTPException, PhoneNumberParseException))
 async def update_user(user: User,
                       user_schema: UpdateUserSchema,
                       photo: UploadFile | str,
                       session: AsyncSession,
                       ):
+    phone_number = False
+    if 'country_code' in user_schema.model_dump() or phone_number in user_schema.model_dump():
+        try:
+            phone_number = PhoneNumber(
+            user_schema.phone_number if user_schema.phone_number else user._phone_number,
+            user_schema.country_code if user_schema.country_code else user.country_code,
+            check_region=True,
+            )
+        except PhoneNumberParseException:
+            raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST,
+                                detail=dict(phone_number='Invalid phone number'))
     values = user_schema.model_dump(exclude_unset=True,
                                     exclude_none=True,
+                                    exclude=('phone_number',
+                                             'country_code',
+                                             )
                                     )
+    if phone_number:
+        values.update(phone_number=phone_number)
+    logger.debug(f'try change user {user.id} {user.login} {user}')
+    logger.debug(f'get to change values: {values}')
+    logger.debug(f'photo {photo}')
     if values:
         if 'login' in values:
             rename_dir_of_login(
@@ -108,13 +147,19 @@ async def update_user(user: User,
         )
         user.picture = new_file
         await session.commit()
-    return user
+        logger.debug(
+        f'has update user {user.id} {user.login}: {user}',
+        )
+    return user_schema.model_dump(exclude_none=True, exclude_unset=True)
 
 
+@logger.catch(reraise=True)
 async def delete_user(user: User,
                       session: AsyncSession,
                       ):
+    logger.debug(f'try delete user {user.id} {user.login} {user}')
     delete_dir(user.login)
     if not user.is_admin:
         await session.delete(user)
         await session.commit()
+        logger.debug('user has delete')

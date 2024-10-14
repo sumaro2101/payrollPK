@@ -2,24 +2,29 @@ from fastapi import UploadFile
 import os
 import aiofiles
 import shutil
+from loguru import logger
 
 from backend.config.settings import IMAGE_URL
 
 
+@logger.catch(reraise=True)
 async def upload_file(file: UploadFile,
                       login: str,
                       ) -> str:
     file_name = file.filename.replace(' ', '').replace('/', '')
     file_location = IMAGE_URL(login)
+    logger.debug(f'get file {file_name} in location {file_location}')
     try:
         async with aiofiles.open(f'{file_location}/{file_name}', 'wb') as file_object:
             connect = await file.read()
             await file_object.write(connect)
     finally:
         await file.close()
+        logger.debug(f'file has close')
     return file_name
 
 
+@logger.catch(reraise=True)
 async def rm_save_upload_file(old: str,
                               file: UploadFile,
                               login: str,
@@ -37,6 +42,7 @@ async def rm_save_upload_file(old: str,
     return file_save
 
 
+@logger.catch(reraise=True)
 def rename_dir_of_login(old: str,
                         new: str,
                         ) -> None:
@@ -49,6 +55,7 @@ def rename_dir_of_login(old: str,
         os.rename(old_location, new_location)
 
 
+@logger.catch(reraise=True, exclude=FileExistsError)
 def make_image_directory(dir_name: str) -> None:
     """
     Создание папки для изобращений
@@ -60,6 +67,7 @@ def make_image_directory(dir_name: str) -> None:
         return
 
 
+@logger.catch(reraise=True)
 def delete_dir(dir_name: str) -> None:
     """
     Удаление папки

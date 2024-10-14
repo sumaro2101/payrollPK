@@ -7,7 +7,6 @@ from typing import TYPE_CHECKING
 
 from datetime import datetime
 
-from .mixins import UserRelationMixin
 from backend.config.models import Base
 
 if TYPE_CHECKING:
@@ -50,3 +49,6 @@ class User(Base):
     position: Mapped['Position'] = relationship(
         back_populates='users',
     )
+
+    def __repr__(self) -> str:
+        return f'{self.login} {self.surname}'

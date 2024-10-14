@@ -12,6 +12,15 @@ from backend.config import settings
 from backend.api_v1 import router
 
 
+logger.add(
+    settings.LOGGING.LOGGER_LOG,
+    format=settings.LOGGING.FORMAT,
+    level=settings.LOGGING.LOGGER_LEVEL,
+    rotation=settings.LOGGING.LOGGER_ROTATION,
+    compression=settings.LOGGING.LOGGER_COMPRESSION,
+)
+
+
 @asynccontextmanager
 async def lifespan(app: FastAPI):
     connect = False

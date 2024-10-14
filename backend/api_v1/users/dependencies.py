@@ -12,9 +12,7 @@ from typing import Annotated
 
 from backend.config.models import User
 from backend.config.db import db_setup
-from .schemas import (AccountantSchemaVision,
-                      UserSchemaVision,
-                      )
+from loguru import logger
 
 
 async def get_user_by_id(user_id: Annotated[int, Path(gt=0)],
@@ -23,6 +21,7 @@ async def get_user_by_id(user_id: Annotated[int, Path(gt=0)],
     """
     Получение пользователя по ID
     """
+    logger.debug(f'try to get user {user_id}')
     stmt = (Select(User).where(User.id == user_id)
             .options(selectinload(User.position)))
     user: User = await session.scalar(statement=stmt)
