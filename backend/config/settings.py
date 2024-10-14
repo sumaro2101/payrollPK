@@ -20,8 +20,10 @@ class DBSettings(BaseModel):
     _password: str = config('DB_PASSWORD')
     _name: str = config('DB_HOST')
     _db_name: str = config('DB_NAME')
+    _db_test: str = config('DB_TEST')
     DEBUG: bool = bool(int(config('DB_DEBUG')))
     url: str = f'{_engine}://{_owner}:{_password}@{_name}/{_db_name}'
+    test_url: str = f'{_engine}://{_owner}:{_password}@{_name}/{_db_test}'
 
 
 class Settings(BaseSettings):
@@ -36,6 +38,7 @@ class Settings(BaseSettings):
     directory: Path = 'backend/static'
     staticname: str = 'static'
     url_images: Path = BASE_DIR / 'images'
+    ADMIN_LOGIN: str = config('ADMIN_LOGIN')
     ADMIN_PASSWORD: str = config('ADMIN_PASSWORD')
 
 settings = Settings()

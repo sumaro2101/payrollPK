@@ -28,7 +28,7 @@ router = APIRouter(prefix='/users',
                    )
 
 
-@router.get(path='/get/list/',
+@router.get(path='/get/list',
             description='Получение списка пользователей',
             )
 async def get_list_users(user: User = Depends(get_active_user),
@@ -42,7 +42,7 @@ async def get_list_users(user: User = Depends(get_active_user),
                                 )
 
 
-@router.get(path='/get/profile/',
+@router.get(path='/get/profile',
             response_model=AccountantSchemaVision,
             description='Просмотр профиля текущего пользователя',
             )
@@ -50,7 +50,7 @@ async def get_profile(user: User = Depends(get_active_user)):
     return user
 
 
-@router.get(path='/get/{user_id}/',
+@router.get(path='/get/{user_id}',
             description='Получение пользователя по ID',
             )
 async def get_user(user: User = Depends(get_active_user),
@@ -66,7 +66,7 @@ async def get_user(user: User = Depends(get_active_user),
         return user_seach
 
 
-@router.put(path='/create/',
+@router.put(path='/create',
             response_model=ViewUserSchema,
             description='Создание пользователя',
             status_code=status.HTTP_201_CREATED,
@@ -93,7 +93,7 @@ async def create_user(user_schema: CreateUserSchema,
     )
 
 
-@router.put(path='/create/accountant/',
+@router.put(path='/create/accountant',
             response_model=ViewUserSchema,
             description='Создание бухгалтера (только админу)',
             status_code=status.HTTP_201_CREATED)
@@ -119,7 +119,7 @@ async def create_accountant(user_schema: CreateUserSchema,
     )
 
 
-@router.patch(path='/update/{user_id}/',
+@router.patch(path='/update/{user_id}',
               response_model=ViewUserSchema,
               description='Обновление пользователя',
               )
@@ -145,7 +145,7 @@ async def update_user(user_schema: UpdateUserSchema,
     )
 
 
-@router.delete(path='/delete/{user_id}/',
+@router.delete(path='/delete/{user_id}',
                status_code=status.HTTP_204_NO_CONTENT,
                )
 async def delete_user(accountant: User = Depends(is_accountant),

@@ -1,4 +1,4 @@
-from sqlalchemy import Select, ScalarResult, Delete
+from sqlalchemy import Select, ScalarResult
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy.exc import IntegrityError
 from sqlalchemy.orm import selectinload
@@ -43,6 +43,9 @@ async def create_user(user_schema: CreateUserSchema,
                       accountant: bool,
                       admin: bool = False,
                       ) -> User:
+    if not user_schema.position_id and not (admin or accountant):
+        raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST,
+                            detail=dict(position_id='Cant be null'))
     password_1, password_2 = user_schema.password_1, user_schema.password_2
     checked_password = PasswordsChecker(
         password_1=password_1,
@@ -86,7 +89,8 @@ async def update_user(user: User,
                       session: AsyncSession,
                       ):
     values = user_schema.model_dump(exclude_unset=True,
-                                    exclude_none=True,)
+                                    exclude_none=True,
+                                    )
     if values:
         if 'login' in values:
             rename_dir_of_login(

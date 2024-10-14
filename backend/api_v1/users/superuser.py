@@ -10,7 +10,7 @@ from backend.api_v1.users.crud import create_user
 
 
 superuser_schema = CreateUserSchema(
-    login=input('Yadmiour admin login\n'),
+    login=settings.ADMIN_LOGIN,
     name='admin',
     surname='admin',
     active=True,
@@ -20,9 +20,8 @@ superuser_schema = CreateUserSchema(
     password_2=settings.ADMIN_PASSWORD,
 )
 
-async def create_superuser():
+async def create_superuser(session):
     try:
-        session = db_setup.session()
         superuser = await create_user(
             user_schema=superuser_schema,
             photo='',
@@ -37,5 +36,8 @@ async def create_superuser():
         await session.aclose()
 
 
+session = db_setup.session()
+
+
 if __name__ == '__main__':
-    asyncio.run(create_superuser())
+    asyncio.run(create_superuser(session))

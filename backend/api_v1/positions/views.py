@@ -20,13 +20,13 @@ router = APIRouter(prefix='/positions',
                    )
 
 
-@router.get(path='/list/',
+@router.get(path='/list',
             response_model=list[PositionSchemaUsers])
 async def get_list_positions(session: AsyncSession = Depends(db_setup.get_session)):
     return await crud.get_list_position(session=session)
 
 
-@router.put(path='/create/',
+@router.put(path='/create',
             response_model=PositionSchema,
             status_code=status.HTTP_201_CREATED,)
 async def create_position(position_schema: CreatePositionSchema,
@@ -39,14 +39,14 @@ async def create_position(position_schema: CreatePositionSchema,
     )
 
 
-@router.get(path='/{position_id}/',
+@router.get(path='/{position_id}',
             response_model=PositionSchemaUsers,
             )
 async def get_position(position: Position = Depends(get_position)):
     return position
 
 
-@router.patch(path='/update/{position_id}/',
+@router.patch(path='/update/{position_id}',
               response_model=PositionSchema,
               )
 async def update_position(position_id: int,
@@ -61,7 +61,7 @@ async def update_position(position_id: int,
     )
 
 
-@router.delete(path='/delete/{position_id}/',
+@router.delete(path='/delete/{position_id}',
                status_code=status.HTTP_204_NO_CONTENT,
                )
 async def delete_position(position_id: int,
