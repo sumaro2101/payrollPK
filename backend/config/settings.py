@@ -49,5 +49,6 @@ class Settings(BaseSettings):
     ADMIN_LOGIN: str = config('ADMIN_LOGIN')
     ADMIN_PASSWORD: str = config('ADMIN_PASSWORD')
     LOGGING: Logging = Logging()
+    ALLOW_HOST: str = config('ALLOW_HOST')
 
 settings = Settings()

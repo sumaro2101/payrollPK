@@ -1,6 +1,7 @@
 import time
 from fastapi import FastAPI
 from fastapi.staticfiles import StaticFiles
+from fastapi.middleware.cors import CORSMiddleware
 
 from contextlib import asynccontextmanager
 
@@ -10,15 +11,6 @@ from backend.config.db import db_setup
 from backend.config.models import Base
 from backend.config import settings
 from backend.api_v1 import router
-
-
-logger.add(
-    settings.LOGGING.LOGGER_LOG,
-    format=settings.LOGGING.FORMAT,
-    level=settings.LOGGING.LOGGER_LEVEL,
-    rotation=settings.LOGGING.LOGGER_ROTATION,
-    compression=settings.LOGGING.LOGGER_COMPRESSION,
-)
 
 
 @asynccontextmanager
@@ -45,3 +37,10 @@ app.mount(
     StaticFiles(directory=settings.directory),
     name=settings.staticname,
     )
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=[settings.ALLOW_HOST],
+    allow_credentials=False,
+    allow_methods=['*'],
+    allow_headers=['*'],
+)
