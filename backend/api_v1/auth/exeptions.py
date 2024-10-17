@@ -14,3 +14,11 @@ def raise_non_active_user():
         status_code=status.HTTP_401_UNAUTHORIZED,
         detail='User is not active',
     )
+
+
+class InvalidAlgorithm(ValueError):
+    """
+    Не верный агоритм
+    """
+
+    pass

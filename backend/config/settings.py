@@ -10,6 +10,7 @@ BASE_DIR = Path(__file__).parent.parent
 
 IMAGE_URL = partial(os.path.join, 'backend', 'images')
 
+CERTS_DIR = BASE_DIR / 'certs'
 
 config = Config('.env')
 
@@ -20,6 +21,16 @@ class Logging(BaseModel):
     LOGGER_LEVEL: str = config('LOGGER_LEVEL')
     LOGGER_ROTATION: str = config('LOGGER_ROTATION')
     LOGGER_COMPRESSION: str = config('LOGGER_COMPRESSION')
+
+
+class AuthJWT(BaseModel):
+    PRIVATE_KEY_PATH: Path = CERTS_DIR / 'jwt-private.pem'
+    PUBLIC_KEY_PATH: Path = CERTS_DIR / 'jwt-public.pem'
+    ALGORITHM: str = config('ALGORITHM_JWT_AUTH')
+    EXPIRE_MINUTES: int = 60 * 2
+    REFRESH_EXPIRE_MINUTES: int = ((60 * 24) * 30)
+    TOKEN_TYPE_FIELD: str = 'type'
+    ACCESS_TOKEN_TYPE: str = 'access'
 
 
 class DBSettings(BaseModel):
@@ -50,5 +61,6 @@ class Settings(BaseSettings):
     ADMIN_PASSWORD: str = config('ADMIN_PASSWORD')
     LOGGING: Logging = Logging()
     ALLOW_HOST: str = config('ALLOW_HOST')
+    AUTH_JWT: AuthJWT = AuthJWT()
 
 settings = Settings()
