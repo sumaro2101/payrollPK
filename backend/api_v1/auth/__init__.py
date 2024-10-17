@@ -1,1 +1,1 @@
-from .auth import get_active_user
+from .auth import get_current_active_user

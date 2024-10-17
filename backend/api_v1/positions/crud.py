@@ -8,6 +8,7 @@ from fastapi import HTTPException, status
 from loguru import logger
 
 from backend.config.models.position import Position
+from backend.config.models.user import User
 from backend.handlers.handle_error import sql_parse_error_message
 from .schemas import (CreatePositionSchema,
                       UpdatePositionSchema,
@@ -24,12 +25,17 @@ async def get_position_id(position_id: int,
     return position.scalar()
 
 
-async def get_list_position(session: AsyncSession) -> list[Position]:
+async def get_list_position(session: AsyncSession,
+                            user: User,
+                            ) -> list[Position]:
     stmt = (Select(Position)
             .order_by(Position.name)
             .options(selectinload(Position.users)))
     positions = await session.execute(statement=stmt)
-    return positions.scalars().all()
+    results = positions.scalars().all()
+    if not user.is_admin and not user.is_accountant:
+        [[delattr(item, 'salary') for item in result.users] for result  in results]
+    return results
 
 
 async def create_position(position_schema: CreatePositionSchema,

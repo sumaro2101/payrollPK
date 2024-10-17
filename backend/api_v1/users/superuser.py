@@ -30,6 +30,7 @@ async def create_superuser(session):
             admin=True,
         )
         logger.info(f'Created super user {superuser.login}')
+        return superuser
     except HTTPException:
         logger.info(f'This super user is already exists')
     finally:
