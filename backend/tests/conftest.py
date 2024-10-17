@@ -17,12 +17,13 @@ from loguru import logger
 from backend.config.db import db_test
 from backend.config.db import db_setup as database
 from backend.config.models import Base
-from backend.api_v1 import router
+from backend.api_v1.routers import router
 from backend.config import settings
 from backend.api_v1.users.superuser import create_superuser
 from backend.config.models.position import Position
 from backend.config.models.user import User
 from backend.hashers import PasswordHasher
+from backend.api_v1.auth.tokens import Token
 
 
 db_setup = db_test(db_url=settings.DB.test_url,
@@ -72,9 +73,9 @@ async def client(app):
 @pytest_asyncio.fixture(scope='session')
 async def admin():
     async with db_setup.session() as session:
-        await create_superuser(session)
-    base_code = base64.b64encode((f'{settings.ADMIN_LOGIN}:{settings.ADMIN_PASSWORD}').encode(encoding='utf-8'))
-    token = f'Basic {base_code.decode(encoding="utf-8")}'
+        user = await create_superuser(session)
+    token = Token(user=user).create_access_token()
+    token = f'Bearer {token}'
     return token
 
 
@@ -125,8 +126,9 @@ async def user(payload_create_user_accountant: dict):
         session.add(user)
         await session.commit()
         await session.refresh(user)
-    base_code = base64.b64encode((f'{user.login}:{payload_create_user_accountant["password_1"]}').encode(encoding='utf-8'))
-    token = f'Basic {base_code.decode(encoding="utf-8")}'
+    token = Token(user=user).create_access_token()
+    token = f'Bearer {token}'
+    logger.info(f'Bearer token = {token}')
     return token
 
 
@@ -150,6 +152,6 @@ async def accountant(payload_create_user_accountant: dict):
         session.add(user)
         await session.commit()
         await session.refresh(user)
-    base_code = base64.b64encode((f'{user.login}:{payload_create_user_accountant["password_1"]}').encode(encoding='utf-8'))
-    token = f'Basic {base_code.decode(encoding="utf-8")}'
+    token = Token(user=user).create_access_token()
+    token = f'Bearer {token}'
     return token
