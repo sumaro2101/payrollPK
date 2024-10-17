@@ -10,6 +10,6 @@ router = APIRouter(prefix='/auth',
                    tags=['Auth'],
                    )
 
-@router.post(path='/login/')
+@router.post(path='/login')
 async def get_login_user(user: User = Depends(get_active_user)):
     return dict(state='success')
