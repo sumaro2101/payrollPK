@@ -13,6 +13,7 @@ from backend.config.db import db_setup
 from .permissions import is_accountant
 from . import crud
 from .dependencies import get_position
+from backend.api_v1.auth import get_current_active_user
 
 
 router = APIRouter(prefix='/positions',
@@ -22,8 +23,12 @@ router = APIRouter(prefix='/positions',
 
 @router.get(path='/list',
             response_model=list[PositionSchemaUsers])
-async def get_list_positions(session: AsyncSession = Depends(db_setup.get_session)):
-    return await crud.get_list_position(session=session)
+async def get_list_positions(user: User = Depends(get_current_active_user),
+                             session: AsyncSession = Depends(db_setup.get_session),
+                             ):
+    return await crud.get_list_position(session=session,
+                                        user=user,
+                                        )
 
 
 @router.put(path='/create',
@@ -42,7 +47,11 @@ async def create_position(position_schema: CreatePositionSchema,
 @router.get(path='/{position_id}',
             response_model=PositionSchemaUsers,
             )
-async def get_position(position: Position = Depends(get_position)):
+async def get_position(user: User = Depends(get_current_active_user),
+                       position: Position = Depends(get_position),
+                       ):
+    if not user.is_admin and not user.is_accountant:
+        [delattr(user, 'salary') for user in position.users]
     return position
 
 

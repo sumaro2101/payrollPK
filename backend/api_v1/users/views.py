@@ -18,7 +18,7 @@ from backend.api_v1.users.schemas import (
     UserSchemaVision,
     )
 from backend.config.db import db_setup
-from backend.api_v1.auth import get_active_user
+from backend.api_v1.auth import get_current_active_user
 from . import crud
 from .permissions import is_admin, is_accountant
 
@@ -31,7 +31,7 @@ router = APIRouter(prefix='/users',
 @router.get(path='/get/list',
             description='Получение списка пользователей',
             )
-async def get_list_users(user: User = Depends(get_active_user),
+async def get_list_users(user: User = Depends(get_current_active_user),
                          session: AsyncSession = Depends(db_setup.get_session),
                          ) -> list[AccountantSchemaVision] | list[UserSchemaVision]:
     """
@@ -46,14 +46,14 @@ async def get_list_users(user: User = Depends(get_active_user),
             response_model=AccountantSchemaVision,
             description='Просмотр профиля текущего пользователя',
             )
-async def get_profile(user: User = Depends(get_active_user)):
+async def get_profile(user: User = Depends(get_current_active_user)):
     return user
 
 
 @router.get(path='/get/{user_id}',
             description='Получение пользователя по ID',
             )
-async def get_user(user: User = Depends(get_active_user),
+async def get_user(user: User = Depends(get_current_active_user),
                    user_seach: User = Depends(get_user_by_id),
                    ) -> AccountantSchemaVision | UserSchemaVision:
     """

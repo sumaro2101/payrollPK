@@ -10,7 +10,7 @@ from loguru import logger
 from backend.config.db import db_setup
 from backend.config.models import Base
 from backend.config import settings
-from backend.api_v1 import router
+from backend.api_v1.routers import router
 
 
 @asynccontextmanager

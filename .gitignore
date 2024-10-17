@@ -183,4 +183,5 @@ dump.rdb
 test.py
 
 # certs
-certs/
+backend/certs/jwt-private.pem
+backend/certs/jwt-public.pem
